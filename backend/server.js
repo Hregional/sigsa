@@ -1,8 +1,11 @@
 // Importa el módulo de Express
 const express = require('express');
 const app = express();
-const PORT = process.env.PORT || 3000;
 const cors = require('cors');
+const pool = require('./database/db'); // Importa la configuración de la base de datos
+require('dotenv').config();
+
+const PORT = process.env.PORT || 3001;
 
 // Middleware para que el servidor pueda procesar JSON en las peticiones
 app.use(express.json());
@@ -19,6 +22,17 @@ app.get('/api/saludo', (req, res) => {
     mensaje: '¡Hola! Este es un endpoint de API.',
     fecha: new Date().toISOString()
   });
+});
+
+// Nuevo endpoint para obtener datos de la base de datos
+app.get('/api/users', async (req, res) => {
+  try {
+    const [rows, fields] = await pool.query('SELECT * FROM users');
+    res.json(rows);
+  } catch (err) {
+    console.error('Error al obtener los datos:', err);
+    res.status(500).json({ error: 'Error del servidor' });
+  }
 });
 
 // Inicia el servidor
